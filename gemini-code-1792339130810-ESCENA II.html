@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuento Interactivo - La Dama de Cao (Escena II)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 700px;
+            width: 100%;
+            padding: 30px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        h1 {
+            color: #8c2814;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+        .story-box {
+            background: #fff9f5;
+            border-left: 6px solid #8c2814;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #34495e;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            background-color: #8c2814;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            box-shadow: 0 4px 10px rgba(140, 40, 20, 0.3);
+        }
+        button:hover {
+            background-color: #a8351a;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .status {
+            font-size: 0.95rem;
+            color: #e67e22;
+            font-weight: bold;
+            min-height: 24px;
+        }
+        .highlight {
+            background-color: #ffeaa7;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>LA DAMA DE CAO</h1>
+        <div class="subtitle">Escena II: "El gran pedido del pueblo y la aparición de la lideresa"</div>
+
+        <div class="story-box" id="storyText">
+            Ante tantas dificultades y el enojo de los dioses, los pobladores del antiguo valle se reunieron muy preocupados. Sabían que debían encontrar una solución para calmar la lluvia y proteger sus hogares. 
+            <br><br>
+            En ese momento de angustia, una mujer valiente y respetada del pueblo tomó la iniciativa. Ella se preparó con sabiduría para liderar a su gente, ofreciendo su ayuda y guiando a todos con valentía para superar la prueba y devolver la paz a su comunidad.
+        </div>
+
+        <div class="controls">
+            <button id="playBtn" onclick="playSpeech()">▶ Escuchar Relato</button>
+            <button id="pauseBtn" onclick="pauseSpeech()" disabled>⏸ Pausar</button>
+            <button id="stopBtn" onclick="stopSpeech()" disabled>⏹ Detener</button>
+        </div>
+
+        <div class="status" id="statusText">Presiona "Escuchar Relato" para comenzar.</div>
+    </div>
+
+    <script>
+        const textToSpeak = `
+            LA DAMA DE CAO. Escena segunda. El gran pedido del pueblo y la aparición de la lideresa.
+            Ante tantas dificultades y el enojo de los dioses, los pobladores del antiguo valle se reunieron muy preocupados. Sabían que debían encontrar una solución para calmar la lluvia y proteger sus hogares.
+            En ese momento de angustia, una mujer valiente y respetada del pueblo tomó la iniciativa. Ella se preparó con sabiduría para liderar a su gente, ofreciendo su ayuda y guiando a todos con valentía para superar la prueba y devolver la paz a su comunidad.
+        `;
+
+        let synth = window.speechSynthesis;
+        let utterance = null;
+
+        const playBtn = document.getElementById("playBtn");
+        const pauseBtn = document.getElementById("pauseBtn");
+        const stopBtn = document.getElementById("stopBtn");
+        const statusText = document.getElementById("statusText");
+
+        function playSpeech() {
+            if (!synth) {
+                alert("Tu navegador no soporta la síntesis de voz.");
+                return;
+            }
+
+            if (synth.paused && utterance) {
+                synth.resume();
+                statusText.textContent = "Reproduciendo relato...";
+                setButtonsState(false, true, true);
+                return;
+            }
+
+            synth.cancel(); // Limpiar cualquier audio anterior
+
+            utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.85; // Velocidad pausada y adecuada para primer grado
+            utterance.pitch = 1.0;
+
+            utterance.onstart = function() {
+                statusText.textContent = "🔊 Reproduciendo relato con atención...";
+                setButtonsState(false, true, true);
+            };
+
+            utterance.onend = function() {
+                statusText.textContent = "¡Lectura finalizada! Puedes volver a escucharla.";
+                setButtonsState(true, false, false);
+            };
+
+            utterance.onerror = function() {
+                statusText.textContent = "Ocurrió un error al reproducir el audio.";
+                setButtonsState(true, false, false);
+            };
+
+            synth.speak(utterance);
+        }
+
+        function pauseSpeech() {
+            if (synth && synth.speaking) {
+                synth.pause();
+                statusText.textContent = "⏸ Audio pausado.";
+                setButtonsState(true, true, false);
+                playBtn.disabled = false;
+                playBtn.textContent = "▶ Continuar";
+            }
+        }
+
+        function stopSpeech() {
+            if (synth) {
+                synth.cancel();
+                statusText.textContent = "⏹ Reproducción detenida.";
+                setButtonsState(true, false, false);
+                playBtn.textContent = "▶ Escuchar Relato";
+            }
+        }
+
+        function setButtonsState(play, pause, stop) {
+            playBtn.disabled = !play;
+            pauseBtn.disabled = !pause;
+            stopBtn.disabled = !stop;
+            if (play) playBtn.textContent = "▶ Escuchar Relato";
+        }
+    </script>
+
+</body>
+</html>
