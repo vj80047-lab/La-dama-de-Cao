@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Dama de Cao - Audio Cuento Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-amber-50 text-slate-800 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-xl w-full bg-white rounded-3xl shadow-xl border-4 border-amber-300 p-6 md:p-8 text-center space-y-6">
+        
+        <!-- Encabezado -->
+        <div class="space-y-1">
+            <span class="bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                Cuento Narrado • 1.º de Primaria
+            </span>
+            <h1 class="text-3xl font-extrabold text-amber-900 mt-2">LA DAMA DE CAO</h1>
+            <p class="text-amber-700 font-semibold text-lg">(Escena I)</p>
+        </div>
+
+        <!-- Reproductor de Audio -->
+        <div class="bg-amber-100/70 p-6 rounded-2xl border-2 border-amber-200 flex flex-col items-center justify-center space-y-4">
+            
+            <div class="flex items-center justify-center space-x-4">
+                <button id="btnPlay" onclick="reproducirAudio()" class="w-16 h-16 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center text-2xl shadow-lg transition transform hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-play ml-1"></i>
+                </button>
+                <button id="btnPause" onclick="pausarAudio()" class="w-12 h-12 bg-amber-200 hover:bg-amber-300 text-amber-800 rounded-full flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-pause"></i>
+                </button>
+                <button id="btnStop" onclick="detenerAudio()" class="w-12 h-12 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-full flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-stop"></i>
+                </button>
+            </div>
+
+            <!-- Estado de reproducción -->
+            <div class="flex items-center space-x-2 text-amber-900 font-medium text-sm">
+                <i id="audioIcon" class="fa-solid fa-volume-high text-amber-600"></i>
+                <span id="audioStatus">Listo para escuchar</span>
+            </div>
+        </div>
+
+        <!-- Texto Adaptado para Lectura y Seguimiento -->
+        <div class="bg-amber-50 p-6 rounded-2xl border border-amber-200 text-left space-y-4 text-slate-700 leading-relaxed text-lg">
+            <p id="p1" class="transition-colors duration-300 p-2 rounded">
+                Hace dos mil años, en el antiguo pueblo Mochica, hacía un calor insoportable y caía una gran lluvia sin parar.
+            </p>
+            <p id="p2" class="transition-colors duration-300 p-2 rounded">
+                Los pobladores estaban muy preocupados porque la Diosa Luna, llamada <strong class="text-amber-800">Shi</strong>, se había escondido detrás de unas nubes oscuras y no se dejaba ver.
+            </p>
+            <p id="p3" class="transition-colors duration-300 p-2 rounded">
+                De pronto, llegaron fuertes vientos y millones de grillos invadieron las casas, los campos y hasta los platos. <span class="font-bold text-amber-900">¡Hacían un ruido tremendo con su cri-cri-cri!</span>
+            </p>
+        </div>
+
+        <div class="text-xs text-slate-400">
+            <i class="fa-solid fa-circle-info"></i> Puedes presionar el botón de reproducción para escuchar la locución animada.
+        </div>
+    </div>
+
+    <script>
+        const textoCompleto = "La Dama de Cao. Escena uno. Hace dos mil años, en el antiguo pueblo Mochica, hacía un calor insoportable y caía una gran lluvia sin parar. Los pobladores estaban muy preocupados porque la Diosa Luna, llamada Shi, se había escondido detrás de unas nubes oscuras y no se dejaba ver. De pronto, llegaron fuertes vientos y millones de grillos invadieron las casas, los campos y hasta los platos. ¡Hacían un ruido tremendo con su cri, cri, cri!";
+
+        let synth = window.speechSynthesis;
+        let utterance = null;
+
+        function prepararAudio() {
+            if ('speechSynthesis' in window) {
+                utterance = new SpeechSynthesisUtterance(textoCompleto);
+                utterance.lang = 'es-ES';
+                utterance.rate = 0.85; // Velocidad pausada ideal para niños
+                utterance.pitch = 1.1;  // Tono cálido y amigable
+
+                utterance.onstart = function() {
+                    document.getElementById('audioStatus').innerText = "Reproduciendo cuento...";
+                    document.getElementById('btnPlay').innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                };
+
+                utterance.onend = function() {
+                    document.getElementById('audioStatus').innerText = "Lectura finalizada";
+                    document.getElementById('btnPlay').innerHTML = '<i class="fa-solid fa-play ml-1"></i>';
+                };
+
+                utterance.onerror = function() {
+                    document.getElementById('audioStatus').innerText = "Error al reproducir audio";
+                };
+            }
+        }
+
+        function reproducirAudio() {
+            if (!utterance) prepararAudio();
+            
+            if (synth.paused) {
+                synth.resume();
+                document.getElementById('audioStatus').innerText = "Reproduciendo cuento...";
+            } else {
+                synth.cancel(); // Reinicia si ya estaba sonar
+                synth.speak(utterance);
+            }
+        }
+
+        function pausarAudio() {
+            if (synth.speaking && !synth.paused) {
+                synth.pause();
+                document.getElementById('audioStatus').innerText = "Audio en pausa";
+            }
+        }
+
+        function detenerAudio() {
+            if (synth.speaking) {
+                synth.cancel();
+                document.getElementById('audioStatus').innerText = "Listo para escuchar";
+                document.getElementById('btnPlay').innerHTML = '<i class="fa-solid fa-play ml-1"></i>';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', prepararAudio);
+    </script>
+</body>
+</html>
